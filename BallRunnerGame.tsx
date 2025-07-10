@@ -10,6 +10,7 @@ import {
   PanResponderGestureState,
   TextInput,
   Alert,
+  Animated, // <-- Add this import
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -103,6 +104,8 @@ const BallRunnerGame: React.FC = () => {
   const scoreRef = useRef<number>(0);
   const gameStateRef = useRef<GameState>("nameInput");
   const lastMilestoneRef = useRef<number>(0);
+  // Rotation animation value
+  const rotation = useRef(new Animated.Value(0)).current;
 
   // Storage keys
   const STORAGE_KEYS = {
@@ -182,10 +185,20 @@ const BallRunnerGame: React.FC = () => {
   const TRIANGLE_SIZE: number = 25;
   const GROUND_LEVEL: number = screenHeight - 100;
 
+  // Rotation animation function
+  const rotateBall = () => {
+    rotation.setValue(0);
+    Animated.timing(rotation, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  };
+
   // Touch handler
   const handleTouch = useCallback((evt: GestureResponderEvent): void => {
     if (gameStateRef.current !== "playing") return;
-
+    rotateBall(); // Trigger rotation animation
     const touchX: number = evt.nativeEvent.locationX;
     const screenCenter: number = screenWidth / 2;
 
@@ -249,7 +262,7 @@ const BallRunnerGame: React.FC = () => {
 
   const generateMilestoneBox = (): void => {
     const newBox: Box = {
-      id: Date.now() + 999,
+      id: Date.now() + Math.random() * 1000,
       x: cameraRef.current + screenWidth + 100,
       y: GROUND_LEVEL - 50, // Very close to ground
       broken: false,
@@ -261,7 +274,7 @@ const BallRunnerGame: React.FC = () => {
 
   const generateCollectibleBall = (): void => {
     const newBall: CollectibleBall = {
-      id: Date.now() + 1000,
+      id: Date.now() + Math.random() * 10000,
       x: cameraRef.current + screenWidth + Math.random() * 200,
       y: GROUND_LEVEL - 150 - Math.random() * 200,
       collected: false,
@@ -271,7 +284,7 @@ const BallRunnerGame: React.FC = () => {
 
   const generateRedTriangle = (): void => {
     const newTriangle: RedTriangle = {
-      id: Date.now() + 2000,
+      id: Date.now() + Math.random() * 20000,
       x: cameraRef.current + screenWidth + Math.random() * 200,
       y: GROUND_LEVEL - 100 - Math.random() * 150,
       hit: false,
@@ -285,7 +298,7 @@ const BallRunnerGame: React.FC = () => {
 
     for (let i = 0; i < 3; i++) {
       newBoxes.push({
-        id: Date.now() + i,
+        id: Date.now() + Math.random() * 10000000,
         x: startX + i * 200 + Math.random() * 100,
         y: GROUND_LEVEL - 100 - Math.random() * 200,
         broken: false,
@@ -468,23 +481,29 @@ const BallRunnerGame: React.FC = () => {
     };
   }, []);
 
+  // Interpolate rotation value
+  const rotateInterpolate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   const renderGame = (): JSX.Element => (
     <View style={styles.gameContainer} {...panResponder.panHandlers}>
       {/* Ground */}
       <View style={styles.ground} />
-
       {/* Ball */}
-      <View
+      <Animated.View
         style={[
           styles.ball,
           {
             left: ballPosition.x - cameraX - BALL_SIZE / 2,
             top: ballPosition.y - BALL_SIZE / 2,
+            transform: [{ rotate: rotateInterpolate }],
           },
         ]}
       >
         <FontAwesome name="soccer-ball-o" size={30} color="black" />
-      </View>
+      </Animated.View>
 
       {/* Boxes */}
       {boxes.map((box: Box) => (
