@@ -8,13 +8,14 @@ import {
   StyleSheet,
   GestureResponderEvent,
   PanResponderGestureState,
-  ViewStyle,
-  TextStyle,
   TextInput,
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Entypo from "@expo/vector-icons/Entypo";
 
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 // Type definitions
 interface Position {
   x: number;
@@ -481,7 +482,9 @@ const BallRunnerGame: React.FC = () => {
             top: ballPosition.y - BALL_SIZE / 2,
           },
         ]}
-      />
+      >
+        <FontAwesome name="soccer-ball-o" size={30} color="black" />
+      </View>
 
       {/* Boxes */}
       {boxes.map((box: Box) => (
@@ -492,19 +495,22 @@ const BallRunnerGame: React.FC = () => {
             {
               left: box.x - cameraX,
               top: box.y,
-              backgroundColor: box.broken
-                ? box.type === "milestone"
-                  ? "#FFD700"
-                  : "#90EE90"
-                : box.type === "milestone"
-                ? "#FF8C00"
-                : "#8B4513",
               opacity: box.broken ? 0.5 : 1,
-              width: box.type === "milestone" ? BOX_SIZE * 1.5 : BOX_SIZE,
-              height: box.type === "milestone" ? BOX_SIZE * 1.5 : BOX_SIZE,
             },
           ]}
-        />
+        >
+          <Entypo
+            name="box"
+            size={box.type === "milestone" ? 60 : 40}
+            color={
+              box.broken
+                ? "rgba(0,0,0,0.5)"
+                : box.type === "milestone"
+                ? "#FF8C00"
+                : "black"
+            }
+          />
+        </View>
       ))}
 
       {/* Collectible Balls */}
@@ -533,7 +539,9 @@ const BallRunnerGame: React.FC = () => {
               top: triangle.y - TRIANGLE_SIZE / 2,
             },
           ]}
-        />
+        >
+          <FontAwesome5 name="exclamation-triangle" size={24} color="#ff4444" />
+        </View>
       ))}
 
       {/* Score */}
@@ -789,9 +797,7 @@ const styles = StyleSheet.create({
 
   ball: {
     position: "absolute",
-    width: 30,
-    height: 30,
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "rgba(255,255,255,0.5)",
     borderRadius: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -802,8 +808,6 @@ const styles = StyleSheet.create({
 
   box: {
     position: "absolute",
-    width: 40,
-    height: 40,
     borderRadius: 5,
   },
 
@@ -822,14 +826,6 @@ const styles = StyleSheet.create({
 
   redTriangle: {
     position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 12.5,
-    borderRightWidth: 12.5,
-    borderBottomWidth: 22,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#FF0000",
   },
 
   scoreContainer: {
